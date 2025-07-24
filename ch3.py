@@ -14,6 +14,13 @@ import numpy as np
 The goal of self-attention is to compute a context vector for each input element that combines information from all other input elements.
 The importance or contribution of each input element for computing the context vector is determined by the attention weights of the input elements.
 When computing the context vector, the attention weights are calculated with respect to the input elements. 
+
+
+The goal of causal attention is to compute a context vector for each input element that combines information from all other input elements before the current element.
+This is used in decoder only models like GPT.
+Masking + dropout is used to prevent the model from using information from future tokens and to prevent overfitting. 
+
+
 """
 
 
@@ -32,7 +39,31 @@ input_query = inputs[1]
 input_1 = inputs[0]
 
 #print(torch.dot(input_query, input_1))
+'''
+Note about the size of the dimensions:
+1. Input matrix dimensions are determined by the sequence length(number of tokens) and the embedding dimension(size of each token's representation)
+2. Weight matrix dimensions have the same input and output dimensions as the embedding dimension, this can vary.
+3. The output matrix dimensions are determined by the sequence length and the input embedding dimension.
 
+
+Multi-head attention:
+
+Input: (1, 1024, 768)
+    ↓
+Split into 12 heads:
+Head 1: (1, 1024, 64) ← Q1, K1, V1
+Head 2: (1, 1024, 64) ← Q2, K2, V2
+...
+Head 12: (1, 1024, 64) ← Q12, K12, V12
+    ↓
+Each head computes attention independently
+    ↓
+Concatenate: (1, 1024, 768)
+    ↓
+Final projection: (1, 1024, 768)
+
+
+'''
 
 ##A simple self attention mechanism without trainable weights
 
@@ -62,7 +93,21 @@ W_query = torch.nn.Parameter(torch.rand(d_in, d_out))
 print(W_query)
 W_key = torch.nn.Parameter(torch.rand(d_in, d_out))
 W_value = torch.nn.Parameter(torch.rand(d_in, d_out))
+'''
+Note about initializing the weights:
 
+What activation function are you using?
+├── Sigmoid/Tanh → Xavier/Glorot
+├── ReLU/Leaky ReLU → Kaiming/He
+└── Linear/No activation → Normal (small std)
+
+What type of network?
+├── Traditional MLP with sigmoid → Xavier/Glorot
+├── CNN with ReLU → Kaiming/He
+├── Transformer/Attention → Normal (0.02 std)
+└── RNN/LSTM → Xavier/Glorot (for sigmoid gates)
+
+'''
 query_2 = x_2 @ W_query
 
 print(query_2)
@@ -76,3 +121,40 @@ print(values)
 keys_2 = keys[1]
 attn_score_22 = torch.dot(query_2, keys_2)
 print(attn_score_22)
+
+'''
+Pseudocode for self-attention (with trainable weights):
+
+1. Compute the query, key, and value vectors for each input element using matrix multiplication between the input token and the trainable weight matrices.
+2. Compute the attention weights for each input element with respect to all other input elements using the dot product of the query vector and the key vector.
+3. Normalize the attention weights by applying a softmax function.
+4. Multiply the value vectors by the now normalized attention weights and sum them up to get the context vector for the input element.
+
+'''
+
+'''
+Pseudocode for causal attention (with trainable weights):
+
+1. Compute the query, key, and value vectors for each input element using matrix multiplication between the input token and the trainable weight matrices.
+2. Compute the attention weights for each input element with respect to all other input elements using the dot product of the query vector and the key vector.
+3. Normalize the attention weights by applying a softmax function.
+4. Mask the attention weights to prevent the model from using information from future tokens.
+5. Multiply the value vectors by the now normalized attention weights and sum them up to get the context vector for the input element.
+
+'''
+
+'''
+Pseudocode for multi-head attention (with trainable weights):
+
+1. Compute the query, key, and value vectors for each input element using matrix multiplication between the input token and the trainable weight matrices.
+2. Split the query, key, and value vectors into multiple heads.
+3. Compute the attention weights for each head using the dot product of the query vector and the key vector.
+4. Normalize the attention weights by applying a softmax function.
+5. Multiply the value vectors by the now normalized attention weights and sum them up to get the context vector for the input element.
+6. Concatenate the context vectors from each head and project them back to the original embedding dimension.
+
+'''
+
+
+#Multi-head attention class
+torch.nn.MultiheadAttention(embed_dim = d_in, num_heads = 12, dropout=0.0, bias=True, add_bias_kv=False, add_zero_attn=False, kdim=None, vdim=None, batch_first=False, device=None, dtype=None)
