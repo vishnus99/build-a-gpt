@@ -1,1 +1,1 @@
-# hltv-forum-scraper
+Building a GPT-2 model trained on text scraped from CS2 website hltv.org. Text was scraped using cloudscraper PyPi package and the GPT-2 model was built according to the LLMs from Scratch tutorial by Sebastian Raschka. 
