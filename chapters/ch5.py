@@ -1,4 +1,4 @@
-from GPT import GPTModel, generate_text_simple
+from GPT_model_script.GPT import GPTModel, generate_text_simple
 import torch
 import tiktoken
 import os
@@ -34,8 +34,7 @@ token_ids = generate_text_simple(model, text_to_tokens(start_context, tokenizer)
 
 print("Output text:\n", tokens_to_text(token_ids, tokenizer))
 
-
-
+file_path = "../scraper and sample text/hltv_forum_threads.txt"
 
 
 
