@@ -166,15 +166,26 @@ train_simple_model(
      model=model,
      train_dataloader=train_dataloader,
      val_dataloader=val_dataloader,
-     num_epochs=20,
+     num_epochs=30,
      optimizer=optimizer,
      device=device
 )
 
+torch.save(model.state_dict(), '../build-a-gpt/Saved_Model/trained_model.pth')
 
+model.load_state_dict(torch.load('../build-a-gpt/Saved_Model/trained_model.pth'))
+model.eval()
 
+#Test generation
+test_context = "Donk is the best player this year"
+token_ids = generate_text_simple(
+     model,
+     text_to_tokens(test_context, tokenizer),
+     50,
+     GPT_CONFIG_124M["context_length"]
+)
 
-    
+print("Generated text:", tokens_to_text(token_ids, tokenizer))    
 
 
     
